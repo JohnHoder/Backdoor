@@ -16,30 +16,30 @@ char* DynamicIP[] = { "62.129.*", (void*)0 };
 
 int AuthCheck(u_char *ip)
 {
-    	int i;
-    	for (i=0; AllowedIP[i] != NULL; i++)
+    int i;
+    for (i=0; AllowedIP[i] != NULL; i++)
+    {
+        if (!strcmp(ip, AllowedIP[i]))
         {
-			if (!strcmp(ip, AllowedIP[i]))
-			{
-				return 1;
-			}
+            return 1;
         }
-    	for (i=0; DynamicIP[i] != NULL; i++)
+        }
+    for (i=0; DynamicIP[i] != NULL; i++)
+    {
+        int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i] - 1);
+
+        char substring[] = "";
+        strncat(substring, &argv[1][0], x+1);
+
+        //printf("substring: %s, IPallowed: %s\n", substring, DynamicIP[i]);
+
+        if (!strncmp(substring, DynamicIP[i], x+1))
         {
-			int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i] - 1);
-
-			char substring[] = "";
-			strncat(substring, &argv[1][0], x+1);
-
-			//printf("substring: %s, IPallowed: %s\n", substring, DynamicIP[i]);
-
-			if (!strncmp(substring, DynamicIP[i], x+1))
-			{
-				printf("\nAccess granted!\n");
-                return 1;
-			}
-    	}
-    	return 0;
+            printf("\nAccess granted!\n");
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void domything(u_int sd, u_char *src) 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     local.sin_port = htons(477);
 
     if ((sIN = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
+    {
     	perror("socket() failed");
     	return 1;
     }
