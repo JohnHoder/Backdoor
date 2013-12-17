@@ -63,16 +63,16 @@ int main(int argc, char *argv[])
     FILE *file;
 	str="/etc/rc.d/rc.local";
 	file=fopen(str,"r");
-	if (file == NULL) 
+    if (file == NULL) 
     {
-		str="/etc/rc.conf";
-		file=fopen(str,"r");
-	}
-	if (file == NULL) 
+        str="/etc/rc.conf";
+        file=fopen(str,"r");
+    }
+    if (file == NULL) 
     {
-		str="/etc/rc.local";
-		file=fopen(str,"r");
-	}
+        str="/etc/rc.local";
+        file=fopen(str,"r");
+    }
     if (file != NULL) 
     {
             char outfile[256], buf[1024];
