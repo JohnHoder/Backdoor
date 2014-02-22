@@ -9,7 +9,7 @@
 
 #define MAXCON 31337
 
-#define STARTUP 1
+#define STARTUP 0  //Set defaultly to false, because the future is not reliably working on all linux distros, needs some more work.
 
 u_char* AllowedIP[] = { "192.169.1.43", "182.68.177.123", (void*)0 };
 char* DynamicIP[] = { "62.129.*", (void*)0 };
