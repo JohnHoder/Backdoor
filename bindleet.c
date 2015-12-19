@@ -14,7 +14,7 @@
 #define STARTUP 0  //Set to false by default, feature is not reliably working on all linux distros, needs some more work.
 
 u_char* AllowedIP[] = { "192.169.1.43", "182.68.177.123", (void*)0 };
-char* DynamicIP[] = { "62.229.*", (void*)0 }; // "122.162.*",
+char* DynamicIP[] = { "62.129.*", (void*)0 }; // "122.162.*",
 
 int Authorize(u_char *ip)
 {
@@ -31,19 +31,16 @@ int Authorize(u_char *ip)
         int x = (int)(strchr(DynamicIP[i], '*') - DynamicIP[i]);
         
         //STRIP * CHAR AWAY
-        char* substr1 = (char*) malloc(x);
-        strncpy(substr1, DynamicIP[i], x);
-        //printf("\n%d\nSubstring of allowed IP: %s\n", x, substr1);
+        char* allowedStripped = (char*) malloc(x);
+        strncpy(allowedStripped, DynamicIP[i], x);
 
         //MAKE SUBSTRING OF INCOMING IP
-        char* substring = (char*) malloc(x + 1);
-        strncpy(substring, ip, x);
+        char* incomingStripped = (char*) malloc(x + 1);
+        strncpy(incomingStripped, ip, x);
 
-        //printf("\n%d\nSubstring of incoming IP: %s\n", x, substring);
-
-        printf("INCOMING: %s, ALLOWED: %s\n", substring, substr1);
+        //printf("INCOMING: %s, ALLOWED: %s\n", incomingStripped, allowedStripped);
         
-        if (!strncmp(substring, substr1, x))
+        if (!strncmp(incomingStripped, allowedStripped, x))
         {
             printf("\nAccess for %s granted!\n", ip);
             return 1;
